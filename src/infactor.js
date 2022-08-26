@@ -18,8 +18,10 @@ const findFirstLineMatching = (lines, expression, after = -1) => Math.min(...lin
 const findLastLineMatching = (lines, expression, before = Number.MAX_SAFE_INTEGER) => Math.max(...lines.map((line, index) => index).filter(index => index < before && lines[index].match(expression)));
 
 const treeSitterLangs = {
-    "js": "tree-sitter-javascript",
-    "java": "tree-sitter-java"
+    "js": () => require("tree-sitter-javascript"),
+    "ts": () => require("tree-sitter-typescript").typescript,
+    "tsx": () => require("tree-sitter-typescript").tsx,
+    "java": () => require("tree-sitter-java")
 };
 
 const createTreeSitterForLanguage = (lang) => {
@@ -31,7 +33,7 @@ const createTreeSitterForLanguage = (lang) => {
 
 const createTreeSitterForFile = (file) => {
     const ext = getFileExtension(file);
-    const lang = require(treeSitterLangs[ext]);
+    const lang = treeSitterLangs[ext]();
     const parser = createTreeSitterForLanguage(lang);
     return { ext, lang, parser };
 }
