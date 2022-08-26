@@ -1,0 +1,168 @@
+* Infactor
+
+  [[../../actions/workflows/build.yml/badge.svg]]
+
+  A simple inline code editor and refactoring tool to use from the command line.
+
+  
+** Rationale
+
+   Ever read a guide that required you to perform manual code changes to multiple source files in an unfamiliar code base? 
+   Ever seen people using `sed`, `awk` or `perl` for the same purpose?
+   
+   Using tools like `sed`, `awk` and `perl` for performing minor changes may work but its hard for users to understand and geeks to maintain.
+   Doing manual changes is error prone and is not a reproducible user experience.
+
+   This tool is an experiment to see if performing minor code changes using the CLI can improve the user experience
+
+** Features
+
+   - [[#add-import][Add import]]
+   - [[#get-line][Get line]] matching expression
+   - [[#add-line][Add line]] matching expression
+   - [[#set-value][Set value]]
+
+** Example usage
+
+*** Get Line
+**** Usage
+     #+BEGIN_EXAMPLE
+Usage: infactor get-line [options] <file> <expression>
+
+Get the last (or optionally the first) line that matches the expression
+
+Arguments:
+  file                      The file to add the import to
+  expression                The regular expression to use for matching
+
+Options:
+  --first                   Flag to return the first line matching
+  --in-class <class>        Search inside the specified class (e.g. function etc)
+  --in-method <method>      Search inside the specified function (e.g. method etc)
+  --in-function <function>  Search inside the specified function (e.g. function etc)
+  -h, --help                display help for command
+     #+END_EXAMPLE
+**** Examples
+***** Get line
+     The following code will get the line number of the last line matching the regular expression `^[ ]conosole`.
+    
+     #+BEGIN_SRC sh
+       infactor.js get-line sample.js "^[ ]*console"
+     #+END_SRC
+
+     The output should be something like: `34` close to the end of the file.
+
+***** Get Line in class
+
+      To limit the scode of the search inside a specific function:
+
+      #+BEGIN_SRC sh
+        infactor.js get-line sample.js "^[ ]*console" --in-class Op
+      #+END_SRC
+
+      The output should be `12` pointing the logging statemtent found inside the `Op` class.
+
+***** Get Line in method
+
+      #+BEGIN_SRC sh
+        infactor.js get-line sample.js "^[ ]*console" --in-class Op --in-method exec
+      #+END_SRC
+
+      The output should be `12` pointing the logging statemtent found inside the `Op` class (same as above).
+
+***** Get Line in function
+
+      #+BEGIN_SRC sh
+        infactor.js get-line sample.js "^[ ]*console" --in-function demo
+      #+END_SRC
+
+      In this case the resut should be `-1` as `demo` function contains a logging statement.
+
+*** Add Line
+**** Usage 
+     
+     #+BEGIN_EXAMPLE
+Usage: infactor add-line [options] <file> <code>
+
+Add a line at the bottom of the block
+
+Arguments:
+  file                      The file to add the import to
+  code                      The code to add
+
+Options:
+  --top                     Flag to enable adding the code at the top of the block
+  --in-class <class>        Search inside the specified class (e.g. function etc)
+  --in-method <method>      Search inside the specified function (e.g. method etc)
+  --in-function <function>  Search inside the specified function (e.g. function etc)
+  -h, --help                display help for command
+     #+END_EXAMPLE
+**** Example 
+***** Adding code
+    
+     #+BEGIN_SRC sh
+       infactor.js add-line sample.js "    console.log('Now demo is also logging!');" --in-function demo
+     #+END_SRC
+
+
+     #+BEGIN_SRC js
+       function demo () {
+           var a = 2;
+           var b = 3
+           new Op(a, b, sum).exec();
+           new Op(a, b, mul).exec();
+           console.log('Now demo is also logging!');
+       }
+     #+END_SRC
+
+***** Adding code to the top of the function
+
+      Using the `--top` flag it's now possible to add code to the top of a function, method, class etc.
+
+      #+BEGIN_SRC sh
+        infactor.js add-line sample.js "    console.log('On top!');" --in-function demo --top
+      #+END_SRC
+
+
+      #+BEGIN_SRC js
+        function demo () {
+            console.log('On top!');
+            var a = 2;
+            var b = 3
+            new Op(a, b, sum).exec();
+            new Op(a, b, mul).exec();
+            console.log('Now demo is also logging!');
+        }
+      #+END_SRC
+
+*** Set value
+    To set the value of a variable you can use the `set` subcommand:
+**** Usage
+     #+BEGIN_EXAMPLE
+ Usage: infactor set [options] <file> <variable> <value>
+
+ Set the value of a variable
+
+ Arguments:
+   file                      The file to add the import to
+   variable                  The variable to set
+   value                     The value to set
+
+ Options:
+   --in-class <class>        Search inside the specified class (e.g. function etc)
+   --in-method <method>      Search inside the specified function (e.g. method etc)
+   --in-function <function>  Search inside the specified function (e.g. function etc)
+   -h, --help                display help for command
+     #+END_EXAMPLE
+**** Examples
+***** Setting the value of a var in a specific class
+
+      #+BEGIN_SRC sh
+      infactor set sample.js a "\"bar\"" --in-class Op
+      #+END_SRC
+
+***** Setting the value of a var in a specific function
+
+      #+BEGIN_SRC sh
+      infactor set sample.js a "\"bar\"" --in-function demo
+      #+END_SRC
