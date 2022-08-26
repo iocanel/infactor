@@ -145,6 +145,22 @@ const addLine = (file, code, options) => {
     return content.slice(0, context.lastChild.startIndex - 1) + "\n" + code + content.slice(context.lastChild.startIndex - 1);
 }
 
+const getValue = (file, variable, options) => {
+    let { lang, content, tree } = parseFile(file);
+    let context = tree.rootNode;
+    let bound;
+    if (options.inClass) {
+        context = findClassBody(options.inClass, lang, tree);
+        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+    }
+    if (options.inFunction) {
+        context = findFunctionBody(options.inFunction, lang, tree, bound);
+        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+    }
+    context = findAssignmentValue(variable, lang, tree, bound) || findVarDeclaratorValue(variable, lang, tree, bound);
+    return content.slice(context.startIndex, context.endIndex);
+}
+
 const setValue = (file, variable, value, options) => {
     let { lang, content, tree } = parseFile(file);
     let context = tree.rootNode;
@@ -161,4 +177,4 @@ const setValue = (file, variable, value, options) => {
     return content.slice(0, context.startIndex) +  value + content.slice(context.endIndex );
 }
 
-module.exports = { parseFile, writeString, writeLines, getLine, addLine, setValue, addImport };
+module.exports = { parseFile, writeString, writeLines, getLine, addLine, setValue, getValue, addImport };

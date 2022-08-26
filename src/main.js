@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-const { parseFile, writeString, addImport, addLine, getLine, setValue } = require('./infactor');
+const { parseFile, writeString, addImport, addLine, getLine, setValue, getValue } = require('./infactor');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -42,6 +42,18 @@ program.command('add-line')
     .action((file, code, options) => {
         let content = addLine(file, code, options);
         writeString(file, content);
+    });
+
+program.command('get')
+    .description('Get the value of a variable')
+    .argument('<file>', 'The file to add the import to')
+    .argument('<variable>', 'The variable to set')
+    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
+    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
+    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .action((file, variable,  options) => {
+        let content = getValue(file, variable, options);
+        console.log(content);
     });
 
 program.command('set')
