@@ -179,4 +179,26 @@ const setValue = (file, variable, value, options) => {
     return content.slice(0, context.startIndex) +  value + content.slice(context.endIndex );
 }
 
-module.exports = { parseFile, writeString, writeLines, getLine, addLine, setValue, getValue, addImport };
+const appendValue = (file, variable, value, options) => {
+    let { lang, content, tree } = parseFile(file);
+    let context = tree.rootNode;
+    let bound;
+    if (options.inClass) {
+        context = findClassBody(options.inClass, lang, tree);
+        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+    }
+    if (options.inFunction) {
+        context = findFunctionBody(options.inFunction, lang, tree, bound);
+        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+    }
+    context = findAssignmentValue(variable, lang, tree, bound) || findVarDeclaratorValue(variable, lang, tree, bound);
+    displayNode(context);
+    if (context.type === "array") {
+        context = context.lastChild;
+        return content.slice(0, context.startIndex) + ", " + value + content.slice(context.startIndex);
+    }
+    return content;
+
+}
+
+module.exports = { parseFile, writeString, writeLines, getLine, addLine, setValue, getValue, appendValue, addImport };

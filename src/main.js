@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-const { parseFile, writeString, addImport, addLine, getLine, setValue, getValue } = require('./infactor');
+const { parseFile, writeString, addImport, addLine, getLine, setValue, getValue, appendValue } = require('./infactor');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -66,7 +66,19 @@ program.command('set')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, variable, value, options) => {
         let content = setValue(file, variable, value, options);
-        console.log(content);
+        writeString(file, content);
+    });
+
+program.command('append')
+    .description('Append the value to a variable (e.g. array)')
+    .argument('<file>', 'The file to add the import to')
+    .argument('<variable>', 'The variable to append to')
+    .argument('<value>', 'The value to append')
+    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
+    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
+    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .action((file, variable, value, options) => {
+        let content = appendValue(file, variable, value, options);
         writeString(file, content);
     });
 

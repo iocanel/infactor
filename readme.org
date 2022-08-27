@@ -21,6 +21,7 @@
    - [[#get-line][Get line]] matching expression
    - [[#add-line][Add line]] matching expression
    - [[#set-value][Set value]]
+   - [[#append-value][Append value]] (only for arrays)
 
 ** Example usage
 
@@ -165,4 +166,31 @@ Options:
 
       #+BEGIN_SRC sh
       infactor set sample.js a "\"bar\"" --in-function demo
+      #+END_SRC
+
+*** Appned value
+    To append the value to an array variable you can use the `append` subcommand:
+**** Usage
+     #+BEGIN_EXAMPLE
+ Usage: infactor append [options] <file> <array variable> <value>
+
+ Set the value of a variable
+
+ Arguments:
+   file                      The file to add the import to
+   variable                  The variable to append to
+   value                     The value to append
+
+ Options:
+   --in-class <class>        Search inside the specified class (e.g. function etc)
+   --in-method <method>      Search inside the specified function (e.g. method etc)
+   --in-function <function>  Search inside the specified function (e.g. function etc)
+   -h, --help                display help for command
+     #+END_EXAMPLE
+
+**** Examples
+***** Appnedcing the value to an array
+
+      #+BEGIN_SRC sh
+      infactor set sample.js array 7 --in-class Op
       #+END_SRC

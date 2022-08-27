@@ -24,7 +24,8 @@ function mul (a, b) {
 
 function demo () {
     var a = 2;
-    var b = 3
+    var b = 3;
+    var r = [1, 2, 3, 4, 5];
     new Op(a, b, sum).exec();
     new Op(a, b, mul).exec();
 }

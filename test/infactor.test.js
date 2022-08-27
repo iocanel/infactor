@@ -8,7 +8,7 @@ describe('infactor', function() {
 
     it("should get line", () => {
         let result = getLine("sample.js", "^[ ]*console", {});
-        assert.equal(result, 34);
+        assert.equal(result, 35);
 
         result = getLine("sample.js", "^[ ]*console", {first: true});
         assert.equal(result, 1);
