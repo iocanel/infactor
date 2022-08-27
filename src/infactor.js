@@ -18,6 +18,7 @@ const findFirstLineMatching = (lines, expression, after = -1) => Math.min(...lin
 const findLastLineMatching = (lines, expression, before = Number.MAX_SAFE_INTEGER) => Math.max(...lines.map((line, index) => index).filter(index => index < before && lines[index].match(expression)));
 
 const treeSitterLangs = {
+    "html": () => require("tree-sitter-html"),
     "js": () => require("tree-sitter-javascript"),
     "ts": () => require("tree-sitter-typescript").typescript,
     "tsx": () => require("tree-sitter-typescript").tsx,
