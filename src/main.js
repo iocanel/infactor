@@ -13,8 +13,14 @@ program.command('add-import')
     .description('Adds an import to the code')
     .argument('<import>', 'The import to add')
     .argument('<file>', 'The file to add the import to')
+    .option('--out', 'Write result to stdout instead of saving to the file')
     .action((newImport, file, options) => {
-        addImport(newImport, file);
+        var content = addImport(newImport, file);
+        if (options.out) {
+            console.log(content);
+        } else {
+            writeString(file, content);
+        }
     });
 
 program.command('get-line')
@@ -35,13 +41,18 @@ program.command('add-line')
     .description('Add a line at the bottom of the block')
     .argument('<file>', 'The file to add the import to')
     .argument('<code>', 'The code to add')
+    .option('--out', 'Write result to stdout instead of saving to the file')
     .option('--top', 'Flag to enable adding the code at the top of the block')
     .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
     .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, code, options) => {
         let content = addLine(file, code, options);
-        writeString(file, content);
+        if (options.out) {
+            console.log(content);
+        } else {
+            writeString(file, content);
+        }
     });
 
 program.command('get')
@@ -53,7 +64,11 @@ program.command('get')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, variable,  options) => {
         let content = getValue(file, variable, options);
-        console.log(content);
+        if (options.out) {
+            console.log(content);
+        } else {
+            writeString(file, content);
+        }
     });
 
 program.command('set')
@@ -61,11 +76,17 @@ program.command('set')
     .argument('<file>', 'The file to add the import to')
     .argument('<variable>', 'The variable to set')
     .argument('<value>', 'The value to set')
+    .option('--out', 'Write result to stdout instead of saving to the file')
     .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
     .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, variable, value, options) => {
         let content = setValue(file, variable, value, options);
+        if (options.out) {
+            console.log(content);
+        } else {
+            writeString(file, content);
+        }
         writeString(file, content);
     });
 
@@ -74,12 +95,17 @@ program.command('append')
     .argument('<file>', 'The file to add the import to')
     .argument('<variable>', 'The variable to append to')
     .argument('<value>', 'The value to append')
+    .option('--out', 'Write result to stdout instead of saving to the file')
     .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
     .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, variable, value, options) => {
         let content = appendValue(file, variable, value, options);
-        writeString(file, content);
+        if (options.out) {
+            console.log(content);
+        } else {
+            writeString(file, content);
+        }
     });
 
 program.parse();

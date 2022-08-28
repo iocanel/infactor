@@ -108,7 +108,7 @@ const addImport = (newImport, file) => {
     var lines = readFileLines(file);
     var index = findLastLineMatching(lines, "^[ ]*import.*;$");
     lines.splice(index + 1, 0, "import " + newImport + ";");
-    writeLines(file, lines);
+    return lines.join('\n');
 }
 
 const getLine = (file, expression, options) => {
