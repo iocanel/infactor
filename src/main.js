@@ -64,11 +64,7 @@ program.command('get')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, variable,  options) => {
         let content = getValue(file, variable, options);
-        if (options.out) {
-            console.log(content);
-        } else {
-            writeString(file, content);
-        }
+        console.log(content);
     });
 
 program.command('set')
