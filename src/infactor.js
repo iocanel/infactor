@@ -1,10 +1,10 @@
 const { readFileSync, createWriteStream } = require('fs');
 
-const LINE_SPILT = /\r?\n/
+const BY_LINE = /\r?\n/
 const NON_SPACE_CHAR = /\S/
 const getFileExtension = (file) => file.substring(file.lastIndexOf('.') + 1);
 const readFile = (file) => readFileSync(file, 'utf-8');
-const readFileLines = (file) => readFile(file).split(LINE_SPILT);
+const readFileLines = (file) => readFile(file).split(BY_LINE);
 
 const writeString = (file, s) => {
     var f = createWriteStream(file);
@@ -51,6 +51,10 @@ const parseFile = (file, existing = null) => {
     var content = readFile(file);
     const tree = existing ? parser.parse(content, existing) : parser.parse(content);
     return { content, tree, lang, parser };
+}
+
+const getIndentOfLine = (line) => {
+    return line.search(NON_SPACE_CHAR);
 }
 
 const getNodeValue = (lines, node) => lines.filter((line, index) => index <= node.endPosition.row && index >= node.startPosition.row).join('\n').substring(node.startPosition.column, node.endPosition.column);
@@ -114,15 +118,22 @@ const addImport = (newImport, file) => {
 
 const getLine = (file, expression, options) => {
     let { lang, content, tree } = parseFile(file);
-    let context = tree.rootNode;
+    let node = tree.rootNode;
     if (options.inClass) {
-        context = findClassBody(lang, tree, options);
+        node = findClassBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
+
     if (options.inFunction) {
-        context = findFunctionBody(lang, tree, options);
+        node = findFunctionBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
+    } else if (options.inMethod) {
+        node = findMethodBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
-    let lines = content.split(LINE_SPILT);
-    if (!context) {
+
+    let lines = content.split(BY_LINE);
+    if (!node) {
         return -1;
     }
 
@@ -137,27 +148,29 @@ const getLine = (file, expression, options) => {
     return 1 + startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), expression);
 }
 
-const getIndentOfLine = (line) => {
-    return line.search(NON_SPACE_CHAR);
-}
-
 const addLine = (file, code, options) => {
     let { lang, content, tree } = parseFile(file);
-    let context = tree.rootNode;
-    let lines = content.split(LINE_SPILT);
+    let node = tree.rootNode;
+    let lines = content.split(BY_LINE);
     if (options.inClass) {
-        context = findClassBody(lang, tree, options);
+        node = findClassBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
+
     if (options.inFunction) {
-        context = findFunctionBody(lang, tree, options);
+        node = findFunctionBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
+    } else if (options.inMethod) {
+        node = findMethodBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
 
     let startRow = options.bound && options.bound.start ? options.bound.start : tree.rootNode.startPosition.row;
     let endRow = options.bound && options.bound.end ? options.bound.end : tree.rootNode.endPosition.row;
 
     if (options.top) {
-        let lineIndex = context.firstChild.startRow - 1;
-        return content.slice(0, context.firstChild.startIndex + 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(context.firstChild.startIndex + 1);
+        let lineIndex = node.firstChild.startRow - 1;
+        return content.slice(0, node.firstChild.startIndex + 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(node.firstChild.startIndex + 1);
     } else if (options.expression) {
         let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.expression);
         let matchedLine = lines[lineIndex];
@@ -165,58 +178,67 @@ const addLine = (file, code, options) => {
         lines.splice(lineIndex + 1, 0, code)
         return lines.join('\n');
     }
-    let lineIndex = context.lastChild.startRow - 2;
-    return content.slice(0, context.lastChild.startIndex - 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(context.lastChild.startIndex - 1);
+    let lineIndex = node.lastChild.startRow - 2;
+    return content.slice(0, node.lastChild.startIndex - 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(node.lastChild.startIndex - 1);
 }
 
 const getValue = (file, variable, options) => {
     let { lang, content, tree } = parseFile(file);
-    let context = tree.rootNode;
+    let node = tree.rootNode;
     if (options.inClass) {
-        context = findClassBody(lang, tree, options);
-        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
+        node = findClassBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     if (options.inFunction) {
-        context = findFunctionBody(lang, tree, options);
-        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
+        node = findFunctionBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
+    } else if (options.inMethod) {
+        node = findMethodBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     options.variable = variable;
-    context = findAssignmentValue(lang, tree, options) || findVarDeclaratorValue(lang, tree, options);
-    return content.slice(context.startIndex, context.endIndex);
+    node = findAssignmentValue(lang, tree, options) || findVarDeclaratorValue(lang, tree, options);
+    return content.slice(node.startIndex, node.endIndex);
 }
 
 const setValue = (file, variable, value, options) => {
     let { lang, content, tree } = parseFile(file);
-    let context = tree.rootNode;
+    let node = tree.rootNode;
     if (options.inClass) {
-        context = findClassBody(lang, tree, options);
-        opiotns.bound = {start: context.startPosition.row, end: context.endPosition.row};
+        node = findClassBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     if (options.inFunction) {
-        context = findFunctionBody(lang, tree, options);
-        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
+        node = findFunctionBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
+    } else if (options.inMethod) {
+        node = findMethodBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     options.variable = variable;
-    context = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
-    return content.slice(0, context.startIndex) +  value + content.slice(context.endIndex );
+    node = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
+    return content.slice(0, node.startIndex) +  value + content.slice(node.endIndex );
 }
 
 const appendValue = (file, variable, value, options) => {
     let { lang, content, tree } = parseFile(file);
-    let context = tree.rootNode;
+    let node = tree.rootNode;
     if (options.inClass) {
-        context = findClassBody(lang, tree, options);
-        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
+        node = findClassBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     if (options.inFunction) {
-        context = findFunctionBody(lang, tree, options);
-        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
+        node = findFunctionBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
+    } else if (options.inMethod) {
+        node = findMethodBody(lang, tree, options);
+        options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     options.variable = variable;
-    context = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
-    if (context.type === "array") {
-        context = context.lastChild;
-        return content.slice(0, context.startIndex) + ", " + value + content.slice(context.startIndex);
+    node = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
+    if (node.type === "array") {
+        node = node.lastChild;
+        return content.slice(0, node.startIndex) + ", " + value + content.slice(node.startIndex);
     }
     return content;
 
