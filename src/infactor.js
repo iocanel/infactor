@@ -79,29 +79,29 @@ const findFirstLineOfClsasDeclaration = (lang, tree, options) => queryNode(lang,
 const findLastLineOfClsasDeclaration = (lang, tree, options) => queryNode(lang, tree, options, createLastItemOfClassQuery);
 
 //Method
-const createMethodBodyQuery = (options) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${options.inMethod}") body: (_) @target )`;
-const createFirstItemOfMethodQuery = (options) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${options.inMethod}") body: (block . (_) @target ))`;
-const createLastItemOfMethodQuery = (options) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${options.inMethod}") body: (block (_) @target .))`;
+const createMethodBodyQuery = (options) => `(method_declaration name: (identifier) @method_name (#eq? @method_name "${options.inMethod}") body: (_) @target )`;
+const createFirstItemOfMethodQuery = (options) => `(method_declaration name: (identifier) @method_name (#eq? @method_name "${options.inMethod}") body: (block . (_) @target ))`;
+const createLastItemOfMethodQuery = (options) => `(method_declaration name: (identifier) @method_name (#eq? @method_name "${options.inMethod}") body: (block (_) @target .))`;
 
 const findMethodBody = (lang, tree, options) => queryNode(lang, tree, options, createMethodBodyQuery);
 const findFirstLineOfMethod = (lang, tree, options) => queryNode(lang, tree, options, createFirstItemOfMethodQuery);
 const findLastLineOfMethod = (lang, tree, options) => queryNode(lang, tree, options, createLastItemOfMethodQuery);
 
 //Function
-const createFunctionBodyQuery = (options) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${options.inFunction}") body: (_) @target)`;
-const createFirstItemOfFunctionQuery = (options) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${options.inFunction}") body: (statement_block . (_) @target ) @outer)`;
-const createLastItemOfFunctionQuery = (options) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${options.inFunction}") body: (statement_block (_) @target .) @outer)`;
+const createFunctionBodyQuery = (options) => `(function_declaration name: (identifier) @function_name (#eq? @function_name "${options.inFunction}") body: (_) @target)`;
+const createFirstItemOfFunctionQuery = (options) => `(function_declaration name: (identifier) @function_name (#eq? @function_name "${options.inFunction}") body: (statement_block . (_) @target ) @outer)`;
+const createLastItemOfFunctionQuery = (options) => `(function_declaration name: (identifier) @function_name (#eq? @function_name "${options.inFunction}") body: (statement_block (_) @target .) @outer)`;
 
 const findFunctionBody = (lang, tree, options) => queryNode(lang, tree, options, createFunctionBodyQuery);
 const findFirstLineOfFunction = (lang, tree, options) => queryNode(lang, tree, options, createFirstItemOfFunctionQuery);
 const findLastLineOfFunction = (lang, tree, options) => queryNode(lang, tree, options, createLastItemOfFunctionQuery);
 
 // Assignment
-const createAssignmentQuery = (options) => `(assignment_expression left: (_) @var_name (#match? @var_name "${options.variable}") right: (_) @target)`;
+const createAssignmentQuery = (options) => `(assignment_expression left: (identifier) @var_name (#eq? @var_name "${options.variable}") right: (_) @target)`;
 const findAssignmentValue = (lang, tree, options) => queryNode(lang, tree, options, createAssignmentQuery);
 
 // Var Declaration
-const createVarDeclaratorQuery = (options) => `(variable_declarator name: (_) @var_name (#match? @var_name "${options.variable}") value: (_) @target)`;
+const createVarDeclaratorQuery = (options) => `(variable_declarator name: (identifier) @var_name (#eq? @var_name "${options.variable}") value: (_) @target)`;
 const findVarDeclaratorValue = (lang, tree, options) => queryNode(lang, tree, options, createVarDeclaratorQuery);
 
 const addImport = (newImport, file) => {
