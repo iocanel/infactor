@@ -171,13 +171,20 @@ const addLine = (file, code, options) => {
     if (options.top) {
         let lineIndex = node.firstChild.startRow - 1;
         return content.slice(0, node.firstChild.startIndex + 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(node.firstChild.startIndex + 1);
-    } else if (options.expression) {
-        let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.expression);
+    } else if (options.after) {
+        let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.after);
         let matchedLine = lines[lineIndex];
         code = matchedLine.slice(0, getIndentOfLine(matchedLine)) + code;
         lines.splice(lineIndex + 1, 0, code)
         return lines.join('\n');
+    } else if (options.before) {
+        let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.before);
+        let matchedLine = lines[lineIndex];
+        code = matchedLine.slice(0, getIndentOfLine(matchedLine)) + code;
+        lines.splice(lineIndex , 0, code)
+        return lines.join('\n');
     }
+
     let lineIndex = node.lastChild.startRow - 2;
     return content.slice(0, node.lastChild.startIndex - 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(node.lastChild.startIndex - 1);
 }
