@@ -54,13 +54,13 @@ const parseFile = (file, existing = null) => {
 
 const getNodeValue = (lines, node) => lines.filter((line, index) => index <= node.endPosition.row && index >= node.startPosition.row).join('\n').substring(node.startPosition.column, node.endPosition.column);
 
-const queryNode = (name, lang, tree, queryFunction, bound) => {
+const queryNode = (lang, tree, options, queryFunction) => {
     const { Query, QueryCursor } = require('tree-sitter');
-    const query = new Query(lang, queryFunction(name));
+    const query = new Query(lang, queryFunction(options));
     const matches = query.matches(tree.rootNode);
-    let min = bound && bound.lower ? bound.lower : tree.rootNode.startPosition.row;
-    let max = bound && bound.upper ? bound.upper : tree.rootNode.endPosition.row;
-    var nodes = matches.flatMap(m => m.captures.filter(c => c.name === "target" && c.node.startPosition.row >= min && c.node.endPosition.row <= max).map(c => c.node));
+    let startRow = options.bound && options.bound.start ? options.bound.start : tree.rootNode.startPosition.row;
+    let endRow = options.bound && options.bound.end ? options.bound.end : tree.rootNode.endPosition.row;
+    var nodes = matches.flatMap(m => m.captures.filter(c => c.name === "target" && c.node.startPosition.row >= startRow && c.node.endPosition.row <= endRow).map(c => c.node));
     return nodes[nodes.length - 1];
 }
 
@@ -70,39 +70,39 @@ const displayNode = (node, indent = 0) => {
 }
 
 //Class
-const createClassBodyQuery = (name) => `(class_declaration name: (identifier) @class_name (#match? @class_name "${name}") body: (_) @target)`;
-const createFirstItemOfClassQuery = (name) => `(class_declaration name: (identifier) @class_name (#match? @class_name "${name}") body: (class_body . (_) @target))`;
-const createLastItemOfClassQuery = (name) => `(class_declaration name: (identifier) @class_name (#match? @class_name "${name}") body: (class_body (_) @target .))`;
+const createClassBodyQuery = (options) => `(class_declaration name: (identifier) @class_name (#match? @class_name "${options.inClass}") body: (_) @target)`;
+const createFirstItemOfClassQuery = (options) => `(class_declaration name: (identifier) @class_name (#match? @class_name "${options.inClass}") body: (class_body . (_) @target))`;
+const createLastItemOfClassQuery = (options) => `(class_declaration name: (identifier) @class_name (#match? @class_name "${options.inClass}") body: (class_body (_) @target .))`;
 
-const findClassBody = (name, lang, tree) => queryNode(name, lang, tree, createClassBodyQuery);
-const findFirstLineOfClsasDeclaration = (name, lang, tree) => queryNode(name, lang, tree, createFirstItemOfClassQuery);
-const findLastLineOfClsasDeclaration = (name, lang, tree) => queryNode(name, lang, tree, createLastItemOfClassQuery);
+const findClassBody = (lang, tree, options) => queryNode(lang, tree, options, createClassBodyQuery);
+const findFirstLineOfClsasDeclaration = (lang, tree, options) => queryNode(lang, tree, options, createFirstItemOfClassQuery);
+const findLastLineOfClsasDeclaration = (lang, tree, options) => queryNode(lang, tree, options, createLastItemOfClassQuery);
 
 //Method
-const createMethodBodyQuery = (name) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${name}") body: (_) @target )`;
-const createFirstItemOfMethodQuery = (name) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${name}") body: (block . (_) @target ))`;
-const createLastItemOfMethodQuery = (name) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${name}") body: (block (_) @target .))`;
+const createMethodBodyQuery = (options) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${options.inMethod}") body: (_) @target )`;
+const createFirstItemOfMethodQuery = (options) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${options.inMethod}") body: (block . (_) @target ))`;
+const createLastItemOfMethodQuery = (options) => `(method_declaration name: (identifier) @method_name (#match? @method_name "${options.inMethod}") body: (block (_) @target .))`;
 
-const findMethodBody = (name, lang, tree) => queryNode(name, lang, tree, createMethodBodyQuery);
-const findFirstLineOfMethod = (name, lang, tree) => queryNode(name, lang, tree, createFirstItemOfMethodQuery);
-const findLastLineOfMethod = (name, lang, tree) => queryNode(name, lang, tree, createLastItemOfMethodQuery);
+const findMethodBody = (lang, tree, options) => queryNode(lang, tree, options, createMethodBodyQuery);
+const findFirstLineOfMethod = (lang, tree, options) => queryNode(lang, tree, options, createFirstItemOfMethodQuery);
+const findLastLineOfMethod = (lang, tree, options) => queryNode(lang, tree, options, createLastItemOfMethodQuery);
 
 //Function
-const createFunctionBodyQuery = (name) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${name}") body: (_) @target)`;
-const createFirstItemOfFunctionQuery = (name) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${name}") body: (statement_block . (_) @target ) @outer)`;
-const createLastItemOfFunctionQuery = (name) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${name}") body: (statement_block (_) @target .) @outer)`;
+const createFunctionBodyQuery = (options) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${options.inFunction}") body: (_) @target)`;
+const createFirstItemOfFunctionQuery = (options) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${options.inFunction}") body: (statement_block . (_) @target ) @outer)`;
+const createLastItemOfFunctionQuery = (options) => `(function_declaration name: (identifier) @function_name (#match? @function_name "${options.inFunction}") body: (statement_block (_) @target .) @outer)`;
 
-const findFunctionBody = (name, lang, tree) => queryNode(name, lang, tree, createFunctionBodyQuery);
-const findFirstLineOfFunction = (name, lang, tree) => queryNode(name, lang, tree, createFirstItemOfFunctionQuery);
-const findLastLineOfFunction = (name, lang, tree) => queryNode(name, lang, tree, createLastItemOfFunctionQuery);
+const findFunctionBody = (lang, tree, options) => queryNode(lang, tree, options, createFunctionBodyQuery);
+const findFirstLineOfFunction = (lang, tree, options) => queryNode(lang, tree, options, createFirstItemOfFunctionQuery);
+const findLastLineOfFunction = (lang, tree, options) => queryNode(lang, tree, options, createLastItemOfFunctionQuery);
 
 // Assignment
-const createAssignmentQuery = (name) => `(assignment_expression left: (_) @var_name (#match? @var_name "${name}") right: (_) @target)`;
-const findAssignmentValue = (name, lang, tree, bound) => queryNode(name, lang, tree, createAssignmentQuery, bound);
+const createAssignmentQuery = (options) => `(assignment_expression left: (_) @var_name (#match? @var_name "${options.variable}") right: (_) @target)`;
+const findAssignmentValue = (lang, tree, options) => queryNode(lang, tree, options, createAssignmentQuery);
 
 // Var Declaration
-const createVarDeclaratorQuery = (name) => `(variable_declarator name: (_) @var_name (#match? @var_name "${name}") value: (_) @target)`;
-const findVarDeclaratorValue = (name, lang, tree, bound) => queryNode(name, lang, tree, createVarDeclaratorQuery, bound);
+const createVarDeclaratorQuery = (options) => `(variable_declarator name: (_) @var_name (#match? @var_name "${options.variable}") value: (_) @target)`;
+const findVarDeclaratorValue = (lang, tree, options) => queryNode(lang, tree, options, createVarDeclaratorQuery);
 
 const addImport = (newImport, file) => {
     var lines = readFileLines(file);
@@ -115,10 +115,10 @@ const getLine = (file, expression, options) => {
     let { lang, content, tree } = parseFile(file);
     let context = tree.rootNode;
     if (options.inClass) {
-        context = findClassBody(options.inClass, lang, tree);
+        context = findClassBody(lang, tree, options);
     }
     if (options.inFunction) {
-        context = findFunctionBody(options.inFunction, lang, tree);
+        context = findFunctionBody(lang, tree, options);
     }
     let lines = content.split(LINE_SPILT);
     if (!context) {
@@ -137,10 +137,10 @@ const addLine = (file, code, options) => {
     let { lang, content, tree } = parseFile(file);
     let context = tree.rootNode;
     if (options.inClass) {
-        context = findClassBody(options.inClass, lang, tree);
+        context = findClassBody(lang, tree, options);
     }
     if (options.inFunction) {
-        context = findFunctionBody(options.inFunction, lang, tree);
+        context = findFunctionBody(lang, tree, options);
     }
     if (options.top) {
         return content.slice(0, context.firstChild.startIndex + 1) + "\n" + code + content.slice(context.firstChild.startIndex + 1);
@@ -151,49 +151,48 @@ const addLine = (file, code, options) => {
 const getValue = (file, variable, options) => {
     let { lang, content, tree } = parseFile(file);
     let context = tree.rootNode;
-    let bound;
     if (options.inClass) {
-        context = findClassBody(options.inClass, lang, tree);
-        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+        context = findClassBody(lang, tree, options);
+        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
     }
     if (options.inFunction) {
-        context = findFunctionBody(options.inFunction, lang, tree, bound);
-        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+        context = findFunctionBody(lang, tree, options);
+        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
     }
-    context = findAssignmentValue(variable, lang, tree, bound) || findVarDeclaratorValue(variable, lang, tree, bound);
+    options.variable = variable;
+    context = findAssignmentValue(lang, tree, options) || findVarDeclaratorValue(lang, tree, options);
     return content.slice(context.startIndex, context.endIndex);
 }
 
 const setValue = (file, variable, value, options) => {
     let { lang, content, tree } = parseFile(file);
     let context = tree.rootNode;
-    let bound;
     if (options.inClass) {
-        context = findClassBody(options.inClass, lang, tree);
-        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+        context = findClassBody(lang, tree, options);
+        opiotns.bound = {start: context.startPosition.row, end: context.endPosition.row};
     }
     if (options.inFunction) {
-        context = findFunctionBody(options.inFunction, lang, tree, bound);
-        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+        context = findFunctionBody(lang, tree, options);
+        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
     }
-    context = findAssignmentValue(variable, lang, tree, bound) || findVarDeclaratorValue(variable, lang, tree, bound);
+    options.variable = variable;
+    context = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
     return content.slice(0, context.startIndex) +  value + content.slice(context.endIndex );
 }
 
 const appendValue = (file, variable, value, options) => {
     let { lang, content, tree } = parseFile(file);
     let context = tree.rootNode;
-    let bound;
     if (options.inClass) {
-        context = findClassBody(options.inClass, lang, tree);
-        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+        context = findClassBody(lang, tree, options);
+        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
     }
     if (options.inFunction) {
-        context = findFunctionBody(options.inFunction, lang, tree, bound);
-        bound = {lower: context.startPosition.row, upper: context.endPosition.row};
+        context = findFunctionBody(lang, tree, options);
+        options.bound = {start: context.startPosition.row, end: context.endPosition.row};
     }
-    context = findAssignmentValue(variable, lang, tree, bound) || findVarDeclaratorValue(variable, lang, tree, bound);
-    displayNode(context);
+    options.variable = variable;
+    context = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
     if (context.type === "array") {
         context = context.lastChild;
         return content.slice(0, context.startIndex) + ", " + value + content.slice(context.startIndex);
