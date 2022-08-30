@@ -53,8 +53,58 @@ const parseFile = (file, existing = null) => {
     return { content, tree, lang, parser };
 }
 
-const getIndentOfLine = (line) => {
-    return line.search(NON_SPACE_CHAR);
+const getIndentSizeOfLine = (line) => {
+    let result = line.search(NON_SPACE_CHAR);
+    return result > 0 ? result : 0;
+}
+
+const getIndentSizeOfLineAtIndex = (lines, index) => {
+    let previousIndentWidth = 0;
+    let nextIndentWidth = 0;
+
+    for (var prev = index - 1; prev > 0 && prev < lines.length; prev--) {
+        let indentSize = lines[prev].search(NON_SPACE_CHAR);
+        if (indentSize > 0) {
+            previousIndentWidth = indentSize;
+        }
+    }
+
+    for (var next = index;  next > 0 && next < lines.length; next++) {
+        let indentSize = lines[next].search(NON_SPACE_CHAR);
+        if (indentSize > 0) {
+            previousIndentWidth = indentSize;
+        }
+    }
+
+    //  Best on the following scientific explanation we always need the largest:
+    //
+    //   (target)
+    //   (added expression)
+    // (end tag)
+
+
+    //
+    //  (open bracket)
+    //    (added expression)
+    //    (target)
+    //
+
+    return Math.max(previousIndentWidth, nextIndentWidth);
+}
+
+const getIndentSizeOfLines = (lines) => {
+    let sizes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    // Let's find which is the most common indent size in the file.
+    for (let i=0; i < lines.length - 1; i++) {
+        currentIndent = getIndentSizeOfLine(lines[i]);
+        nextIndent = getIndentSizeOfLine(lines[i + 1]);
+        let size = Math.abs(nextIndent - currentIndent);
+        if (size > 0 && size < sizes.length) {
+            sizes[size]+=1;
+        }
+    }
+    const max = Math.max(...sizes);
+    return sizes.indexOf(max);
 }
 
 const getNodeValue = (lines, node) => lines.filter((line, index) => index <= node.endPosition.row && index >= node.startPosition.row).join('\n').substring(node.startPosition.column, node.endPosition.column);
@@ -170,23 +220,23 @@ const addLine = (file, code, options) => {
 
     if (options.top) {
         let lineIndex = node.firstChild.startRow - 1;
-        return content.slice(0, node.firstChild.startIndex + 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(node.firstChild.startIndex + 1);
+        return content.slice(0, node.firstChild.startIndex + 1) + "\n" + getIndentSizeOfLineAtIndex(lines, index) + code + content.slice(node.firstChild.startIndex + 1);
     } else if (options.after) {
         let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.after);
         let matchedLine = lines[lineIndex];
-        code = matchedLine.slice(0, getIndentOfLine(matchedLine)) + code;
+        code = matchedLine.slice(0, getIndentSizeOfLineAtIndex(lines, lineIndex)) + code;
         lines.splice(lineIndex + 1, 0, code)
         return lines.join('\n');
     } else if (options.before) {
         let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.before);
         let matchedLine = lines[lineIndex];
-        code = matchedLine.slice(0, getIndentOfLine(matchedLine)) + code;
+        code = matchedLine.slice(0, getIndentSizeOfLineAtIndex(lines, lineIndex)) + code;
         lines.splice(lineIndex , 0, code)
         return lines.join('\n');
     }
 
     let lineIndex = node.lastChild.startRow - 2;
-    return content.slice(0, node.lastChild.startIndex - 1) + "\n" + getIndentOfLine(lines[lineIndex]) + code + content.slice(node.lastChild.startIndex - 1);
+    return content.slice(0, node.lastChild.startIndex - 1) + "\n" + getIndentSizeOfLineAtIndex(lines, lineIndex) + code + content.slice(node.lastChild.startIndex - 1);
 }
 
 const getValue = (file, variable, options) => {
@@ -223,7 +273,7 @@ const setValue = (file, variable, value, options) => {
         options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     options.variable = variable;
-    node = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
+    node = findAssignmentValue(lang, tree, options) || findVarDeclaratorValue(lang, tree, options);
     return content.slice(0, node.startIndex) +  value + content.slice(node.endIndex );
 }
 
@@ -251,4 +301,4 @@ const appendValue = (file, variable, value, options) => {
 
 }
 
-module.exports = { parseFile, writeString, writeLines, getLine, addLine, setValue, getValue, appendValue, addImport };
+module.exports = { parseFile, writeString, writeLines, getIndentSizeOfLine, getIndentSizeOfLines, getLine, addLine, setValue, getValue, appendValue, addImport };

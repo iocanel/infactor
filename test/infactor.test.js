@@ -1,8 +1,34 @@
 const chai = require("chai");
-const { getLine } = require("../src/infactor");
+const { getIndentSizeOfLine, getIndentSizeOfLines, getLine } = require("../src/infactor");
 
 var assert = chai.assert;
 describe('infactor', function() {
+    it("should get indent size of line" , () => {
+        assert.equal(0, getIndentSizeOfLine(''));
+        assert.equal(0, getIndentSizeOfLine('no spaces'));
+        assert.equal(2, getIndentSizeOfLine('  two spaces'));
+        assert.equal(4, getIndentSizeOfLine('    four spaces'));
+        assert.equal(8, getIndentSizeOfLine('        eight spaces'));
+    });
+
+    it("should get indent size of lines" , () => {
+        assert.equal(2, getIndentSizeOfLines([
+            'fun withTwo() {',
+            '  console.log("two spaces");',
+            '}']));
+
+        assert.equal(2, getIndentSizeOfLines([
+            '  fun withTwo() {',
+            '    console.log("two spaces");',
+            '  }']));
+
+        assert.equal(4, getIndentSizeOfLines([
+            '    fun withFour() {',
+            '        console.log("four spaces");',
+            '    }']));
+    });
+
+
     it("should add import", () => {
     });
 
