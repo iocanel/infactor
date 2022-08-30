@@ -97,6 +97,7 @@ program.command('append')
     .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
     .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-element <element>', 'Search inside the specified element (e.g. jsx etc)')
     .action((file, variable, value, options) => {
         let content = appendValue(file, variable, value, options);
         if (options.out) {

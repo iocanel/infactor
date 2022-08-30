@@ -159,6 +159,10 @@ const findAssignmentValue = (lang, tree, options) => queryNode(lang, tree, optio
 const createVarDeclaratorQuery = (options) => `(variable_declarator name: (identifier) @var_name (#eq? @var_name "${options.variable}") value: (_) @target)`;
 const findVarDeclaratorValue = (lang, tree, options) => queryNode(lang, tree, options, createVarDeclaratorQuery);
 
+// JSX Element
+const createJsxElementQuery = (options) => `(jsx_element open_tag: (jsx_opening_element name: (identifier) @element_name (#eq? @element_name "${options.inElement}"))) @target`;
+const findJsxElement = (lang, tree, options) => queryNode(lang, tree, options, createJsxElementQuery);
+
 const addImport = (newImport, file) => {
     var lines = readFileLines(file);
     var index = findLastLineMatching(lines, "^[ ]*import.*;$");
@@ -292,11 +296,23 @@ const appendValue = (file, variable, value, options) => {
         options.bound = {start: node.startPosition.row, end: node.endPosition.row};
     }
     options.variable = variable;
-    node = findAssignmentValue(variable, lang, tree) || findVarDeclaratorValue(variable, lang, tree);
-    if (node.type === "array") {
+    node = findAssignmentValue(lang, tree, options) || findVarDeclaratorValue(lang, tree, options);
+    options.bound = {start: node.startPosition.row, end: node.endPosition.row};
+
+    if (options.inElement) {
+        node = findJsxElement(lang, tree, options);
+        node = node.lastChild;
+        let lines = content.split(BY_LINE);
+        let lineIndex = node.startPosition.row - 1;
+        let matchedLine = lines[lineIndex];
+        value = matchedLine.slice(0, getIndentSizeOfLineAtIndex(lines, lineIndex)) + value + "\n";
+      //  value = value + "\n";
+        return content.slice(0, node.startIndex) + value + content.slice(node.startIndex);
+    } else if (node.type === "array") {
         node = node.lastChild;
         return content.slice(0, node.startIndex) + ", " + value + content.slice(node.startIndex);
     }
+
     return content;
 
 }
