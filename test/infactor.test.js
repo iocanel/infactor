@@ -41,6 +41,9 @@ describe('infactor', function() {
 
         result = getLine("sample.js", "^[ ]*console", {inClass: "Op"});
         assert.equal(result, 12);
+
+        result = getLine("sample.js", "var a", {inFunction: "demo", first: true});
+        assert.equal(result, 26);
     });
 
     it("should add line", () => {
