@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-const { parseFile, writeString, addImport, addLine, getLine, setValue, getValue, appendValue } = require('./infactor');
+const { BY_LINE, parseFile, writeString, writeLines, addImport, addLine, getLine, setValue, getValue, appendValue } = require('./infactor');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -24,17 +24,46 @@ program.command('add-import')
     });
 
 program.command('get-line')
-    .description('Get the last (or optionally the first) line that matches the expression')
+    .description('Get the line or number of the last (or optionally the first) line that matches the expression')
     .argument('<file>', 'The file to add the import to')
     .argument('<expression>', 'The regular expression to use for matching')
+    .option('--text', 'Flag to display the actual line instead of the number')
     .option('--first', 'Flag to return the first line matching')
     .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
     .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
     .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
     .action((file, expression, options) => {
         let { lang, content, tree } = parseFile(file);
-        var result = getLine(file, expression, options);
-        console.log(result > 0 ? result : -1);
+        let lineNumber = getLine(file, expression, options);
+        if (options.text && lineNumber > 0) {
+            let lines = content.split(BY_LINE);
+            console.log(lines[lineNumber - 1]);
+        } else {
+            console.log(lineNumber > 0 ? lineNumber : -1);
+        }
+    });
+
+program.command('remove-line')
+    .description('Remove the line of the last (or optionally the first) line that matches the expression')
+    .argument('<file>', 'The file to add the import to')
+    .argument('<expression>', 'The regular expression to use for matching')
+    .option('--out', 'Write result to stdout instead of saving to the file')
+    .option('--first', 'Flag to return the first line matching')
+    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
+    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
+    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .action((file, expression, options) => {
+        let { lang, content, tree } = parseFile(file);
+        let lineNumber = getLine(file, expression, options);
+        if (lineNumber > 0) {
+            let lines = content.split(BY_LINE);
+            lines.splice(lineNumber - 1, 1);
+            if (options.out) {
+                console.log(lines.join('\n'));
+            } else {
+                writeLines(file, lines);
+            }
+        }
     });
 
 program.command('add-line')

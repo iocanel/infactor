@@ -196,9 +196,10 @@ const getLine = (file, expression, options) => {
 
     if (options.first) {
         // the actual index differs from the line number by one
-        return 1 + startRow + findFirstLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.expression);
+        return 1 + startRow + findFirstLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), expression);
     } 
 
+    // the actual index differs from the line number by one
     return 1 + startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), expression);
 }
 
@@ -317,4 +318,4 @@ const appendValue = (file, variable, value, options) => {
 
 }
 
-module.exports = { parseFile, writeString, writeLines, getIndentSizeOfLine, getIndentSizeOfLines, getLine, addLine, setValue, getValue, appendValue, addImport };
+module.exports = { BY_LINE, parseFile, writeString, writeLines, getIndentSizeOfLine, getIndentSizeOfLines, getLine, addLine, setValue, getValue, appendValue, addImport };
