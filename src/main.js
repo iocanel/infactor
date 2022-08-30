@@ -29,9 +29,9 @@ program.command('get-line')
     .argument('<expression>', 'The regular expression to use for matching')
     .option('--text', 'Flag to display the actual line instead of the number')
     .option('--first', 'Flag to return the first line matching')
-    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
-    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
-    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-class <class>', 'Search inside the specified class')
+    .option('--in-method <method>', 'Search inside the specified method')
+    .option('--in-function <function>', 'Search inside the specified function')
     .action((file, expression, options) => {
         let { lang, content, tree } = parseFile(file);
         let lineNumber = getLine(file, expression, options);
@@ -49,9 +49,9 @@ program.command('remove-line')
     .argument('<expression>', 'The regular expression to use for matching')
     .option('--out', 'Write result to stdout instead of saving to the file')
     .option('--first', 'Flag to return the first line matching')
-    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
-    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
-    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-class <class>', 'Search inside the specified class')
+    .option('--in-method <method>', 'Search inside the specified method')
+    .option('--in-function <function>', 'Search inside the specified function')
     .action((file, expression, options) => {
         let { lang, content, tree } = parseFile(file);
         let lineNumber = getLine(file, expression, options);
@@ -74,9 +74,9 @@ program.command('add-line')
     .option('--top', 'Flag to enable adding the code at the top of the block')
     .option('--before <expression>', 'The expression to match the line before which the code will be added')
     .option('--after <expression>', 'The expression to match the line after which the code will be added')
-    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
-    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
-    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-class <class>', 'Search inside the specified class')
+    .option('--in-method <method>', 'Search inside the specified method')
+    .option('--in-function <function>', 'Search inside the specified function')
     .action((file, code, options) => {
         let content = addLine(file, code, options);
         if (options.out) {
@@ -90,9 +90,9 @@ program.command('get')
     .description('Get the value of a variable')
     .argument('<file>', 'The file to add the import to')
     .argument('<variable>', 'The variable to set')
-    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
-    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
-    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-class <class>', 'Search inside the specified class')
+    .option('--in-method <method>', 'Search inside the specified method')
+    .option('--in-function <function>', 'Search inside the specified function')
     .action((file, variable,  options) => {
         let content = getValue(file, variable, options);
         console.log(content);
@@ -104,9 +104,9 @@ program.command('set')
     .argument('<variable>', 'The variable to set')
     .argument('<value>', 'The value to set')
     .option('--out', 'Write result to stdout instead of saving to the file')
-    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
-    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
-    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-class <class>', 'Search inside the specified class')
+    .option('--in-method <method>', 'Search inside the specified method')
+    .option('--in-function <function>', 'Search inside the specified function')
     .action((file, variable, value, options) => {
         let content = setValue(file, variable, value, options);
         if (options.out) {
@@ -123,9 +123,9 @@ program.command('append')
     .argument('<variable>', 'The variable to append to')
     .argument('<value>', 'The value to append')
     .option('--out', 'Write result to stdout instead of saving to the file')
-    .option('--in-class <class>', 'Search inside the specified class (e.g. function etc)')
-    .option('--in-method <method>', 'Search inside the specified function (e.g. method etc)')
-    .option('--in-function <function>', 'Search inside the specified function (e.g. function etc)')
+    .option('--in-class <class>', 'Search inside the specified class ')
+    .option('--in-method <method>', 'Search inside the specified method')
+    .option('--in-function <function>', 'Search inside the specified function')
     .option('--in-element <element>', 'Search inside the specified element (e.g. jsx etc)')
     .action((file, variable, value, options) => {
         let content = appendValue(file, variable, value, options);

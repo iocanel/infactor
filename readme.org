@@ -40,9 +40,9 @@ Arguments:
 Options:
   --text                    Flag to display the actual line instead of the number
   --first                   Flag to return the first line matching
-  --in-class <class>        Search inside the specified class (e.g. function etc)
-  --in-method <method>      Search inside the specified function (e.g. method etc)
-  --in-function <function>  Search inside the specified function (e.g. function etc)
+  --in-class <class>        Search inside the specified class
+  --in-method <method>      Search inside the specified function
+  --in-function <function>  Search inside the specified function
   -h, --help
      #+END_EXAMPLE
 **** Examples
@@ -98,9 +98,9 @@ Options:
   --top                     Flag to enable adding the code at the top of the block
   --before <expression>     The expression to match the line before which the code will be added
   --after <expression>      The expression to match the line after which the code will be added
-  --in-class <class>        Search inside the specified class (e.g. function etc)
-  --in-method <method>      Search inside the specified function (e.g. method etc)
-  --in-function <function>  Search inside the specified function (e.g. function etc)
+  --in-class <class>        Search inside the specified class
+  --in-method <method>      Search inside the specified method
+  --in-function <function>  Search inside the specified function
   -h, --help                display help for command
      #+END_EXAMPLE
 **** Example 
@@ -156,9 +156,9 @@ Arguments:
 Options:
   --out                     Write result to stdout instead of saving to the file
   --first                   Flag to return the first line matching
-  --in-class <class>        Search inside the specified class (e.g. function etc)
-  --in-method <method>      Search inside the specified function (e.g. method etc)
-  --in-function <function>  Search inside the specified function (e.g. function etc)
+  --in-class <class>        Search inside the specified class
+  --in-method <method>      Search inside the specified method 
+  --in-function <function>  Search inside the specified function
   -h, --help                display help for command
      #+END_EXAMPLE
 **** Example 
@@ -209,9 +209,9 @@ Arguments:
 
 Options:
   --out                     Write result to stdout instead of saving to the file
-  --in-class <class>        Search inside the specified class (e.g. function etc)
-  --in-method <method>      Search inside the specified function (e.g. method etc)
-  --in-function <function>  Search inside the specified function (e.g. function etc)
+  --in-class <class>        Search inside the specified class
+  --in-method <method>      Search inside the specified method
+  --in-function <function>  Search inside the specified function
   -h, --help                display help for command
      #+END_EXAMPLE
 **** Examples
@@ -242,9 +242,9 @@ Arguments:
 
 Options:
   --out                     Write result to stdout instead of saving to the file
-  --in-class <class>        Search inside the specified class (e.g. function etc)
-  --in-method <method>      Search inside the specified function (e.g. method etc)
-  --in-function <function>  Search inside the specified function (e.g. function etc)
+  --in-class <class>        Search inside the specified class
+  --in-method <method>      Search inside the specified method
+  --in-function <function>  Search inside the specified function
   --in-element <element>    Search inside the specified element (e.g. jsx etc)
   -h, --help                display help for command
      #+END_EXAMPLE
