@@ -20,6 +20,7 @@
    - [[#add-import][Add import]]
    - [[#get-line][Get line]] matching expression
    - [[#add-line][Add line]] matching expression
+   - [[#remove-line][Remove line]] matching expression
    - [[#set-value][Set value]]
    - [[#append-value][Append value]] (only for arrays)
 
@@ -30,18 +31,19 @@
      #+BEGIN_EXAMPLE
 Usage: infactor get-line [options] <file> <expression>
 
-Get the last (or optionally the first) line that matches the expression
+Get the line or number of the last (or optionally the first) line that matches the expression
 
 Arguments:
   file                      The file to add the import to
   expression                The regular expression to use for matching
 
 Options:
+  --text                    Flag to display the actual line instead of the number
   --first                   Flag to return the first line matching
   --in-class <class>        Search inside the specified class (e.g. function etc)
   --in-method <method>      Search inside the specified function (e.g. method etc)
   --in-function <function>  Search inside the specified function (e.g. function etc)
-  -h, --help                display help for command
+  -h, --help
      #+END_EXAMPLE
 **** Examples
 ***** Get line
@@ -92,7 +94,10 @@ Arguments:
   code                      The code to add
 
 Options:
+  --out                     Write result to stdout instead of saving to the file
   --top                     Flag to enable adding the code at the top of the block
+  --before <expression>     The expression to match the line before which the code will be added
+  --after <expression>      The expression to match the line after which the code will be added
   --in-class <class>        Search inside the specified class (e.g. function etc)
   --in-method <method>      Search inside the specified function (e.g. method etc)
   --in-function <function>  Search inside the specified function (e.g. function etc)
@@ -136,24 +141,78 @@ Options:
         }
       #+END_SRC
 
+*** Remove Line
+**** Usage 
+     
+     #+BEGIN_EXAMPLE
+Usage: infactor remove-line [options] <file> <expression>
+
+Remove the line of the last (or optionally the first) line that matches the expression
+
+Arguments:
+  file                      The file to add the import to
+  expression                The regular expression to use for matching
+
+Options:
+  --out                     Write result to stdout instead of saving to the file
+  --first                   Flag to return the first line matching
+  --in-class <class>        Search inside the specified class (e.g. function etc)
+  --in-method <method>      Search inside the specified function (e.g. method etc)
+  --in-function <function>  Search inside the specified function (e.g. function etc)
+  -h, --help                display help for command
+     #+END_EXAMPLE
+**** Example 
+
+***** Removing a line
+
+      Given the following code contained in the [[./sample.js]] file:
+
+     #+BEGIN_SRC js
+       function demo () {
+           var a = 2;
+           var b = 3;
+           var array = [1, 2, 3, 4, 5];
+           new Op(a, b, sum).exec();
+           new Op(a, b, mul).exec();
+       }
+     #+END_SRC
+
+     We shall remove the uneeded array declaration using:
+    
+     #+BEGIN_SRC sh
+       infactor.js remove-line sample.js "^[ ]*var array" --in-function demo --out
+     #+END_SRC
+
+     The output should be something like:
+
+     #+BEGIN_SRC js
+       function demo () {
+           var a = 2;
+           var b = 3;
+           new Op(a, b, sum).exec();
+           new Op(a, b, mul).exec();
+       }
+     #+END_SRC
+
 *** Set value
     To set the value of a variable you can use the `set` subcommand:
 **** Usage
      #+BEGIN_EXAMPLE
- Usage: infactor set [options] <file> <variable> <value>
+Usage: infactor set [options] <file> <variable> <value>
 
- Set the value of a variable
+Set the value of a variable
 
- Arguments:
-   file                      The file to add the import to
-   variable                  The variable to set
-   value                     The value to set
+Arguments:
+  file                      The file to add the import to
+  variable                  The variable to set
+  value                     The value to set
 
- Options:
-   --in-class <class>        Search inside the specified class (e.g. function etc)
-   --in-method <method>      Search inside the specified function (e.g. method etc)
-   --in-function <function>  Search inside the specified function (e.g. function etc)
-   -h, --help                display help for command
+Options:
+  --out                     Write result to stdout instead of saving to the file
+  --in-class <class>        Search inside the specified class (e.g. function etc)
+  --in-method <method>      Search inside the specified function (e.g. method etc)
+  --in-function <function>  Search inside the specified function (e.g. function etc)
+  -h, --help                display help for command
      #+END_EXAMPLE
 **** Examples
 ***** Setting the value of a var in a specific class
@@ -168,28 +227,30 @@ Options:
       infactor set sample.js a "\"bar\"" --in-function demo
       #+END_SRC
 
-*** Appned value
+*** Append value
     To append the value to an array variable you can use the `append` subcommand:
 **** Usage
      #+BEGIN_EXAMPLE
- Usage: infactor append [options] <file> <array variable> <value>
+Usage: infactor append [options] <file> <variable> <value>
 
- Set the value of a variable
+Append the value to a variable (e.g. array)
 
- Arguments:
-   file                      The file to add the import to
-   variable                  The variable to append to
-   value                     The value to append
+Arguments:
+  file                      The file to add the import to
+  variable                  The variable to append to
+  value                     The value to append
 
- Options:
-   --in-class <class>        Search inside the specified class (e.g. function etc)
-   --in-method <method>      Search inside the specified function (e.g. method etc)
-   --in-function <function>  Search inside the specified function (e.g. function etc)
-   -h, --help                display help for command
+Options:
+  --out                     Write result to stdout instead of saving to the file
+  --in-class <class>        Search inside the specified class (e.g. function etc)
+  --in-method <method>      Search inside the specified function (e.g. method etc)
+  --in-function <function>  Search inside the specified function (e.g. function etc)
+  --in-element <element>    Search inside the specified element (e.g. jsx etc)
+  -h, --help                display help for command
      #+END_EXAMPLE
 
 **** Examples
-***** Appnedcing the value to an array
+***** Appending the value to an array
 
       #+BEGIN_SRC sh
       infactor set sample.js array 7 --in-class Op
