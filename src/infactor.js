@@ -225,7 +225,7 @@ const addLine = (file, code, options) => {
 
     if (options.top) {
         let lineIndex = node.firstChild.startRow - 1;
-        return content.slice(0, node.firstChild.startIndex + 1) + "\n" + getIndentSizeOfLineAtIndex(lines, index) + code + content.slice(node.firstChild.startIndex + 1);
+        return content.slice(0, node.firstChild.startIndex + 1) + "\n" + " ".repeat(getIndentSizeOfLineAtIndex(lines, lineIndex)) + code + content.slice(node.firstChild.startIndex + 1);
     } else if (options.after) {
         let lineIndex = startRow + findLastLineMatching(lines.filter((line, index) => index >= startRow && index <= endRow), options.after);
         let matchedLine = lines[lineIndex];
